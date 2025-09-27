@@ -1,4 +1,5 @@
-"use client"; 
+"use client"; // Hooksを使用するため、この宣言が必須です
+
 import axios from "axios";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -153,14 +154,14 @@ function InputForm() {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      // ▼▼▼ 修正箇所：エンドポイントを /api/ に変更 ▼▼▼
-      // vercel.json のルーティング設定に従い、FastAPIのルートエンドポイントに送る
-      const response = await axios.post("/api/", data, {
+      // ▼▼▼ 修正箇所：エンドポイントを /api/simulate に変更 ▼▼▼
+      // vercel.json のルーティングと Fast API のデコレータに合わせる
+      const response = await axios.post("/api/simulate", data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
-      // ▲▲▲ 修正箇所：エンドポイントを /api/ に変更 ▲▲▲
+      // ▲▲▲ 修正箇所：エンドポイントを /api/simulate に変更 ▲▲▲
       
       const resultString = JSON.stringify(response.data);
       router.push(`/results?data=${encodeURIComponent(resultString)}`);

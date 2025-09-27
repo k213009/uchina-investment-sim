@@ -10,21 +10,20 @@ from typing import Dict
 # Vercel環境で動作するFastAPIアプリの初期化
 app = FastAPI()
 
-# --- CORS設定: 405エラーの原因の一つを解消 ---
-# Vercelのフロントエンドと通信するために必要
+# --- CORS設定: 405/CORS問題を解消 ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # デプロイ後も動くように全許可
+    allow_origins=["*"], # 開発・デプロイ中は「*」で全許可
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # --- CSVファイルの読み込み ---
-# Vercel環境でのファイルパスを安定させる
 def load_csv():
     """Vercel環境で land_date_okinawa.csv を確実に読み込む"""
     possible_paths = [
+        # Vercelの実行環境で試すべき主なパス
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "land_date_okinawa.csv"),
         os.path.join(os.getcwd(), "api", "land_date_okinawa.csv"),
     ]
@@ -136,12 +135,14 @@ def find_a_rank_loan(data, noi_year1, collateral_value):
     return 0
 
 # --- APIエンドポイント ---
-@app.post("/") # Vercelのルーティング(vercel.json)により、/api/ へのPOSTリクエストがここに来る
+# ▼▼▼ 修正箇所：FastAPIのデコレータを /simulate に修正 ▼▼▼
+@app.post("/simulate") # vercel.jsonのルーティングとInputForm.jsに合わせる
 async def simulate(data: Dict):
     try:
+        # FastAPIはリクエストボディを自動でパースするため、引数dataをそのまま使用
         data = {k: v or 0 for k, v in data.items()}
         
-        # --- 既存の計算ロジックを再配置 ---
+        # --- メインの計算ロジック（変更なし） ---
         price_per_sqm, land_price_source = find_closest_land_price(data.get("address", ""))
         evaluated_land_cost = (price_per_sqm * data.get("landArea", 0)) / 10000
 
@@ -251,4 +252,5 @@ async def simulate(data: Dict):
             
     except Exception as e:
         traceback.print_exc()
+        # 内部エラーを500として返す
         raise HTTPException(status_code=500, detail={"error": f"Calculation error: {str(e)}"})
