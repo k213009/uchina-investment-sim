@@ -149,16 +149,18 @@ function InputForm() {
     });
   };
 
-  // --- ▼▼▼ ここからが修正箇所 ▼▼▼ ---
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      // APIのURLを相対パスに変更し、axiosで通信
-      const response = await axios.post("/api/simulate", data, {
+      // ▼▼▼ 修正箇所：エンドポイントを /api/ に変更 ▼▼▼
+      // vercel.json のルーティング設定に従い、FastAPIのルートエンドポイントに送る
+      const response = await axios.post("/api/", data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
+      // ▲▲▲ 修正箇所：エンドポイントを /api/ に変更 ▲▲▲
+      
       const resultString = JSON.stringify(response.data);
       router.push(`/results?data=${encodeURIComponent(resultString)}`);
     } catch (error) {
@@ -173,7 +175,6 @@ function InputForm() {
       setIsLoading(false);
     }
   };
-  // --- ▲▲▲ ここまでが修正箇所 ▲▲▲ ---
 
   return (
     <FormContainer>

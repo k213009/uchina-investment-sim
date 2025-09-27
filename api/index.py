@@ -2,26 +2,49 @@ import os
 import difflib
 import pandas as pd
 import numpy_financial as npf
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import traceback
+from typing import Dict
 
-# Vercel環境で正しく動作するFlaskアプリの初期化
-app = Flask(__name__)
-# 最もシンプルかつ強力なCORS設定
-CORS(app)
+# Vercel環境で動作するFastAPIアプリの初期化
+app = FastAPI()
+
+# --- CORS設定: 405エラーの原因の一つを解消 ---
+# Vercelのフロントエンドと通信するために必要
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # デプロイ後も動くように全許可
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- CSVファイルの読み込み ---
-try:
-    _dir = os.path.dirname(__file__)
-    csv_path = os.path.join(_dir, "land_data_okinawa.csv")
-    land_data_df = pd.read_csv(csv_path)
-    print("CSV data loaded successfully.")
-except Exception as e:
-    print(f"Error loading CSV: {e}")
-    land_data_df = None
+# Vercel環境でのファイルパスを安定させる
+def load_csv():
+    """Vercel環境で land_date_okinawa.csv を確実に読み込む"""
+    possible_paths = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "land_date_okinawa.csv"),
+        os.path.join(os.getcwd(), "api", "land_date_okinawa.csv"),
+    ]
+    
+    for csv_path in possible_paths:
+        if os.path.exists(csv_path):
+            try:
+                df = pd.read_csv(csv_path)
+                print(f"CSV data loaded successfully from: {csv_path}")
+                return df
+            except Exception as e:
+                print(f"Error reading CSV at {csv_path}: {e}")
+                
+    print("CSV data loading failed from all possible paths.")
+    return None
 
-# --- 定数設定 ---
+land_data_df = load_csv()
+
+
+# --- 定数設定 (変更なし) ---
 STRUCTURE_DATA = {
     "RC": {"replacement_cost": 20, "useful_life": 47},
     "Steel": {"replacement_cost": 18.6, "useful_life": 34},
@@ -33,7 +56,7 @@ WATER_TANK_CLEANING_COST = 5
 LAND_CAP_RATES = {"Naha": 0.032, "Chunanbu": 0.034, "Hokubu": 0.035}
 BUILDING_CAP_RATE = 0.055
 
-# --- 計算関数 ---
+# --- 計算関数 (変更なし) ---
 def find_closest_land_price(user_address):
     if land_data_df is None or land_data_df.empty or not user_address:
         return 0, "地価データなし"
@@ -69,6 +92,9 @@ def get_score(dscr, ltv):
     ]
     if ltv_cat >= len(score_matrix[0]):
         ltv_cat = len(score_matrix[0]) - 1
+    if dscr_cat >= len(score_matrix):
+        dscr_cat = len(score_matrix) - 1
+        
     return score_matrix[dscr_cat][ltv_cat]
 
 def calculate_bank_metrics(noi, land_eval_cost, building_value, region):
@@ -87,138 +113,142 @@ def find_a_rank_loan(data, noi_year1, collateral_value):
     loan_amount = data.get("loanAmount", 0)
     interest_rate = data.get("interestRate", 0)
     loan_term = data.get("loanTerm", 0)
+    
     if not all([loan_amount, interest_rate, loan_term, collateral_value]):
         return 0
+        
     initial_loan_payment = (-1 * npf.pmt(interest_rate / 100 / 12, loan_term * 12, loan_amount) * 12)
     initial_dscr = (noi_year1 / initial_loan_payment) if initial_loan_payment > 0 else float("inf")
-    initial_ltv = (loan_amount / collateral_value) * 100
+    initial_ltv = (loan_amount / collateral_value) * 100 if collateral_value > 0 else float("inf")
+    
     if get_score(initial_dscr, initial_ltv) >= 80:
         return loan_amount
+        
     for test_loan in range(int(loan_amount), 0, -50):
         test_loan_payment = (-1 * npf.pmt(interest_rate / 100 / 12, loan_term * 12, test_loan) * 12)
+        
         test_dscr = (noi_year1 / test_loan_payment) if test_loan_payment > 0 else float("inf")
-        test_ltv = (test_loan / collateral_value) * 100
+        test_ltv = (test_loan / collateral_value) * 100 if collateral_value > 0 else float("inf")
+        
         if get_score(test_dscr, test_ltv) >= 80:
             return test_loan
+            
     return 0
 
 # --- APIエンドポイント ---
-@app.route('/api/simulate', methods=['POST', 'OPTIONS'])
-def simulate():
-    if request.method == 'OPTIONS':
-        return '', 204
+@app.post("/") # Vercelのルーティング(vercel.json)により、/api/ へのPOSTリクエストがここに来る
+async def simulate(data: Dict):
+    try:
+        data = {k: v or 0 for k, v in data.items()}
+        
+        # --- 既存の計算ロジックを再配置 ---
+        price_per_sqm, land_price_source = find_closest_land_price(data.get("address", ""))
+        evaluated_land_cost = (price_per_sqm * data.get("landArea", 0)) / 10000
 
-    if request.method == 'POST':
-        try:
-            data = {k: v or 0 for k, v in request.json.items()}
+        property_price = data.get("buildingCost", 0) + data.get("landCost", 0)
+        brokerage_fee = (property_price * 0.03 + 6) if data.get("buildingAge", 0) > 0 else 0
+        stamp_duty = 6
+        registration_tax = property_price * 0.015 + data.get("loanAmount", 0) * 0.004 + 10
+        property_acquisition_tax = property_price * 0.03
+        automated_other_costs = brokerage_fee + stamp_duty + registration_tax + property_acquisition_tax
+        property_total_cost = data.get("buildingCost", 0) + data.get("landCost", 0) + automated_other_costs
+
+        yearly_loan_payment = (-1 * npf.pmt(data.get("interestRate", 0) / 100 / 12, data.get("loanTerm", 0) * 12, data.get("loanAmount", 0)) * 12) if all(data.get(k, 0) > 0 for k in ["loanAmount", "loanTerm", "interestRate"]) else 0
+        
+        structure_info = STRUCTURE_DATA.get(data.get("structure", "Wood"), STRUCTURE_DATA["Wood"])
+        building_replacement_cost = structure_info["replacement_cost"] * data.get("buildingArea", 0)
+        total_age_y1 = data.get("buildingAge", 0) + 1
+        
+        useful_life = structure_info["useful_life"]
+        building_value_y1 = building_replacement_cost * max(0, (useful_life - total_age_y1) / useful_life) if useful_life > 0 else 0
+
+        repair_rate_y1 = 0.007 if total_age_y1 <= 10 else 0.010
+
+        year1_expenses = {
+            "repair_cost": building_replacement_cost * repair_rate_y1 * 0.3,
+            "property_tax": (data.get("landCost", 0) * 1/6) * 0.014 + (building_value_y1 * 1/2) * 0.014,
+            "fire_insurance": building_value_y1 * 0.001,
+            "management_fee": data.get("rent", 0) * 0.05,
+            "capital_expenditure": building_replacement_cost * repair_rate_y1 * 0.7,
+            "utilities": 2.3 * data.get("rooms", 0),
+            "elevator_cost": ELEVATOR_MAINTENANCE_COST if data.get("hasElevator") == "yes" else 0,
+            "water_tank_cost": WATER_TANK_CLEANING_COST,
+        }
+        year1_expenses["total"] = sum(year1_expenses.values())
+        noi_year1 = data.get("rent", 0) - year1_expenses["total"]
+        cash_flow_y1 = noi_year1 - yearly_loan_payment
+
+        collateral_value, cost_approach_value, income_approach_value, bank_appraisal_value = calculate_bank_metrics(noi_year1, evaluated_land_cost, building_value_y1, data.get("region", "Hokubu"))
+        
+        ltv = (data.get("loanAmount", 0) / collateral_value) * 100 if collateral_value > 0 else float("inf")
+        dscr = noi_year1 / yearly_loan_payment if yearly_loan_payment > 0 else float("inf")
+        score = get_score(dscr, ltv)
+        rank = "A" if score >= 80 else "B" if score >= 60 else "D" if score < 40 else "C"
+
+        estimated_loan_amount = find_a_rank_loan(data, noi_year1, collateral_value)
+        required_equity = property_total_cost - estimated_loan_amount
+
+        long_term_projection, cumulative_cash_flow = [], 0
+        current_rent, current_loan_balance = data.get("rent", 0), data.get("loanAmount", 0)
+
+        for year in range(1, 36):
+            total_age = data.get("buildingAge", 0) + year
+            noi_projection = current_rent - year1_expenses["total"]
+            current_loan_payment = yearly_loan_payment if year <= data.get("loanTerm", 0) else 0
+            cash_flow_projection = noi_projection - current_loan_payment
+            cumulative_cash_flow += cash_flow_projection
+            if year <= data.get("loanTerm", 0) and data.get("loanAmount", 0) > 0:
+                interest_paid = current_loan_balance * (data.get("interestRate", 0) / 100)
+                principal_paid = yearly_loan_payment - interest_paid
+                current_loan_balance -= principal_paid
+                current_loan_balance = max(0, current_loan_balance)
+            else:
+                current_loan_balance = 0
             
-            price_per_sqm, land_price_source = find_closest_land_price(data.get("address", ""))
-            evaluated_land_cost = (price_per_sqm * data.get("landArea", 0)) / 10000
-
-            property_price = data.get("buildingCost", 0) + data.get("landCost", 0)
-            brokerage_fee = (property_price * 0.03 + 6) if data.get("buildingAge", 0) > 0 else 0
-            stamp_duty = 6
-            registration_tax = property_price * 0.015 + data.get("loanAmount", 0) * 0.004 + 10
-            property_acquisition_tax = property_price * 0.03
-            automated_other_costs = brokerage_fee + stamp_duty + registration_tax + property_acquisition_tax
-            property_total_cost = data.get("buildingCost", 0) + data.get("landCost", 0) + automated_other_costs
-
-            yearly_loan_payment = (-1 * npf.pmt(data.get("interestRate", 0) / 100 / 12, data.get("loanTerm", 0) * 12, data.get("loanAmount", 0)) * 12) if all(data.get(k, 0) > 0 for k in ["loanAmount", "loanTerm", "interestRate"]) else 0
+            building_current_value = building_replacement_cost * max(0, (structure_info["useful_life"] - total_age) / structure_info["useful_life"]) if structure_info["useful_life"] > 0 else 0
             
-            structure_info = STRUCTURE_DATA.get(data.get("structure", "Wood"), STRUCTURE_DATA["Wood"])
-            building_replacement_cost = structure_info["replacement_cost"] * data.get("buildingArea", 0)
-            total_age_y1 = data.get("buildingAge", 0) + 1
+            collateral_value_projection, _, _, _ = calculate_bank_metrics(noi_year1, evaluated_land_cost, building_current_value, data.get("region", "Hokubu"))
             
-            useful_life = structure_info["useful_life"]
-            building_value_y1 = building_replacement_cost * max(0, (useful_life - total_age_y1) / useful_life) if useful_life > 0 else 0
+            if year == 1 or year % 5 == 0:
+                long_term_projection.append({
+                    "year": year, "cash_flow": round(cash_flow_projection, 0),
+                    "loan_balance": round(current_loan_balance, 0), "collateral_value": round(collateral_value_projection, 0),
+                    "cumulative_cash_flow": round(cumulative_cash_flow, 0),
+                })
+            if total_age > 10 and year % 5 == 0:
+                current_rent *= 1 - 0.01
 
-            repair_rate_y1 = 0.007 if total_age_y1 <= 10 else 0.010
+        surface_yield = (data.get("rent", 0) / property_total_cost) * 100 if property_total_cost > 0 else 0
+        net_yield = (noi_year1 / property_total_cost) * 100 if property_total_cost > 0 else 0
+        equity = property_total_cost - data.get("loanAmount", 0)
+        cash_on_cash_return = (cash_flow_y1 / equity) * 100 if equity > 0 else 0
+        total_outgoings_year1 = year1_expenses["total"] + yearly_loan_payment
+        break_even_occupancy = (total_outgoings_year1 / data.get("rent", 0)) * 100 if data.get("rent", 0) > 0 else 0
+        collateral_coverage_ratio = (collateral_value / data.get("loanAmount", 0)) * 100 if data.get("loanAmount", 0) > 0 else float("inf")
+        unsecured_amount = max(0, data.get("loanAmount", 0) - collateral_value)
 
-            year1_expenses = {
-                "repair_cost": building_replacement_cost * repair_rate_y1 * 0.3,
-                "property_tax": (data.get("landCost", 0) * 1/6) * 0.014 + (building_value_y1 * 1/2) * 0.014,
-                "fire_insurance": building_value_y1 * 0.001,
-                "management_fee": data.get("rent", 0) * 0.05,
-                "capital_expenditure": building_replacement_cost * repair_rate_y1 * 0.7,
-                "utilities": 2.3 * data.get("rooms", 0),
-                "elevator_cost": ELEVATOR_MAINTENANCE_COST if data.get("hasElevator") == "yes" else 0,
-                "water_tank_cost": WATER_TANK_CLEANING_COST,
-            }
-            year1_expenses["total"] = sum(year1_expenses.values())
-            noi_year1 = data.get("rent", 0) - year1_expenses["total"]
-            cash_flow_y1 = noi_year1 - yearly_loan_payment
-
-            collateral_value, cost_approach_value, income_approach_value, bank_appraisal_value = calculate_bank_metrics(noi_year1, evaluated_land_cost, building_value_y1, data.get("region", "Hokubu"))
-            
-            ltv = (data.get("loanAmount", 0) / collateral_value) * 100 if collateral_value > 0 else float("inf")
-            dscr = noi_year1 / yearly_loan_payment if yearly_loan_payment > 0 else float("inf")
-            score = get_score(dscr, ltv)
-            rank = "A" if score >= 80 else "B" if score >= 60 else "D" if score < 40 else "C"
-
-            estimated_loan_amount = find_a_rank_loan(data, noi_year1, collateral_value)
-            required_equity = property_total_cost - estimated_loan_amount
-
-            long_term_projection, cumulative_cash_flow = [], 0
-            current_rent, current_loan_balance = data.get("rent", 0), data.get("loanAmount", 0)
-
-            for year in range(1, 36):
-                total_age = data.get("buildingAge", 0) + year
-                noi_projection = current_rent - year1_expenses["total"]
-                current_loan_payment = yearly_loan_payment if year <= data.get("loanTerm", 0) else 0
-                cash_flow_projection = noi_projection - current_loan_payment
-                cumulative_cash_flow += cash_flow_projection
-                if year <= data.get("loanTerm", 0) and data.get("loanAmount", 0) > 0:
-                    interest_paid = current_loan_balance * (data.get("interestRate", 0) / 100)
-                    principal_paid = yearly_loan_payment - interest_paid
-                    current_loan_balance -= principal_paid
-                    current_loan_balance = max(0, current_loan_balance)
-                else:
-                    current_loan_balance = 0
-                
-                building_current_value = building_replacement_cost * max(0, (structure_info["useful_life"] - total_age) / structure_info["useful_life"]) if structure_info["useful_life"] > 0 else 0
-                
-                collateral_value_projection, _, _, _ = calculate_bank_metrics(noi_year1, evaluated_land_cost, building_current_value, data.get("region", "Hokubu"))
-                
-                if year == 1 or year % 5 == 0:
-                    long_term_projection.append({
-                        "year": year, "cash_flow": round(cash_flow_projection, 0),
-                        "loan_balance": round(current_loan_balance, 0), "collateral_value": round(collateral_value_projection, 0),
-                        "cumulative_cash_flow": round(cumulative_cash_flow, 0),
-                    })
-                if total_age > 10 and year % 5 == 0:
-                    current_rent *= 1 - 0.01
-
-            surface_yield = (data.get("rent", 0) / property_total_cost) * 100 if property_total_cost > 0 else 0
-            net_yield = (noi_year1 / property_total_cost) * 100 if property_total_cost > 0 else 0
-            equity = property_total_cost - data.get("loanAmount", 0)
-            cash_on_cash_return = (cash_flow_y1 / equity) * 100 if equity > 0 else 0
-            total_outgoings_year1 = year1_expenses["total"] + yearly_loan_payment
-            break_even_occupancy = (total_outgoings_year1 / data.get("rent", 0)) * 100 if data.get("rent", 0) > 0 else 0
-            collateral_coverage_ratio = (collateral_value / data.get("loanAmount", 0)) * 100 if data.get("loanAmount", 0) > 0 else float("inf")
-            unsecured_amount = max(0, data.get("loanAmount", 0) - collateral_value)
-
-            response_data = {
-                "market_price": round(property_total_cost, 0), "cost_approach_value": round(cost_approach_value, 0),
-                "income_approach_value": round(income_approach_value, 0), "bank_appraisal_value": round(bank_appraisal_value, 0),
-                "collateral_value": round(collateral_value, 0), "surface_yield": round(surface_yield, 2), "net_yield": round(net_yield, 2),
-                "cash_flow": round(cash_flow_y1, 0), "dscr": round(dscr, 2), "ltv": round(ltv, 2), "score": score, "rank": rank,
-                "long_term_projection": long_term_projection, "year1_expenses": {k: round(v, 2) for k, v in year1_expenses.items()},
-                "yearly_revenue": round(data.get("rent", 0), 2), "yearly_loan_payment": round(yearly_loan_payment, 2),
-                "break_even_occupancy": round(break_even_occupancy, 2), "cash_on_cash_return": round(cash_on_cash_return, 2),
-                "collateral_coverage_ratio": round(collateral_coverage_ratio, 2), "unsecured_amount": round(unsecured_amount, 0),
-                "estimated_loan_amount": round(estimated_loan_amount, 0), "required_equity": round(required_equity, 0),
-                "user_loan_amount": data.get("loanAmount", 0),
-                "cost_approach_breakdown": { "land": round(evaluated_land_cost, 0), "building": round(cost_approach_value - evaluated_land_cost, 0), },
-                "funding_plan": { "building_cost": round(data.get("buildingCost", 0), 0), "land_cost": round(data.get("landCost", 0), 0),
-                    "other_costs_details": { "brokerage_fee": round(brokerage_fee, 2), "stamp_duty": round(stamp_duty, 2),
-                        "registration_tax": round(registration_tax, 2), "property_acquisition_tax": round(property_acquisition_tax, 2),
-                        "total": round(automated_other_costs, 0),
-                    },
+        response_data = {
+            "market_price": round(property_total_cost, 0), "cost_approach_value": round(cost_approach_value, 0),
+            "income_approach_value": round(income_approach_value, 0), "bank_appraisal_value": round(bank_appraisal_value, 0),
+            "collateral_value": round(collateral_value, 0), "surface_yield": round(surface_yield, 2), "net_yield": round(net_yield, 2),
+            "cash_flow": round(cash_flow_y1, 0), "dscr": round(dscr, 2), "ltv": round(ltv, 2), "score": score, "rank": rank,
+            "long_term_projection": long_term_projection, "year1_expenses": {k: round(v, 2) for k, v in year1_expenses.items()},
+            "yearly_revenue": round(data.get("rent", 0), 2), "yearly_loan_payment": round(yearly_loan_payment, 2),
+            "break_even_occupancy": round(break_even_occupancy, 2), "cash_on_cash_return": round(cash_on_cash_return, 2),
+            "collateral_coverage_ratio": round(collateral_coverage_ratio, 2), "unsecured_amount": round(unsecured_amount, 0),
+            "estimated_loan_amount": round(estimated_loan_amount, 0), "required_equity": round(required_equity, 0),
+            "user_loan_amount": data.get("loanAmount", 0),
+            "cost_approach_breakdown": { "land": round(evaluated_land_cost, 0), "building": round(cost_approach_value - evaluated_land_cost, 0), },
+            "funding_plan": { "building_cost": round(data.get("buildingCost", 0), 0), "land_cost": round(data.get("landCost", 0), 0),
+                "other_costs_details": { "brokerage_fee": round(brokerage_fee, 2), "stamp_duty": round(stamp_duty, 2),
+                    "registration_tax": round(registration_tax, 2), "property_acquisition_tax": round(property_acquisition_tax, 2),
+                    "total": round(automated_other_costs, 0),
                 },
-                "land_price_source": land_price_source,
-            }
-            return jsonify(response_data)
+            },
+            "land_price_source": land_price_source,
+        }
+        return response_data
             
-        except Exception as e:
-            traceback.print_exc()
-            return jsonify({"error": f"Calculation error: {str(e)}"}), 500
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail={"error": f"Calculation error: {str(e)}"})
