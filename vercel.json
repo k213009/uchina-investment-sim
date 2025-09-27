@@ -15,7 +15,7 @@
   "routes": [
     {
       "src": "/api/simulate",
-      "dest": "api/index.py"
+      "dest": "api/index.py/$1"
     },
     {
       "src": "/(.*)",
