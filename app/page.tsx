@@ -1,3 +1,4 @@
+"use client";
 import InputForm from './components/InputForm';
 
 // InputFormをそのままルートページとして表示
