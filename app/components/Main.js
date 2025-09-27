@@ -1,18 +1,15 @@
 'use client'; 
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import InputForm from './InputForm';
-import ResultsPage from './ResultsPage';
+// ResultsPageとreact-router-domは不要なので削除
 
 function Main() {
+  // ページ遷移の機能はNext.jsが自動で行うので、ここではInputFormを直接表示するだけ
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<InputForm />} />
-        <Route path="/results" element={<ResultsPage />} />
-      </Routes>
-    </Router>
+    <>
+      <InputForm />
+    </>
   );
 }
 
