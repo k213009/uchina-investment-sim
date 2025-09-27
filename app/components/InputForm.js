@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import styled from "styled-components";
 
 // (styled-componentsの定義は変更ありません)
@@ -128,7 +128,7 @@ function InputForm() {
   } = useForm();
 
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleDemoData = () => {
     reset({
@@ -159,7 +159,8 @@ function InputForm() {
           "Content-Type": "application/json",
         },
       });
-      navigate("/results", { state: { result: response.data } });
+      const resultString = JSON.stringify(response.data);
+      router.push(`/results?data=${encodeURIComponent(resultString)}`);
     } catch (error) {
       console.error("サーバーとの通信でエラーが発生しました:", error);
       // エラーメッセージを分かりやすく表示
