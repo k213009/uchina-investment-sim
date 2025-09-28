@@ -180,7 +180,9 @@ function InputForm() {
 
   return (
     <FormContainer>
-      <h1>うちなー収益物件シミュレーター</h1>
+      <h1 style={{ fontSize: '2.5em', textAlign: 'center', color: '#007bff', marginBottom: '30px' }}>
+      うちなー収益物件シミュレーター
+      </h1>
       <AppDescription>
         <h2 style={{ fontSize: '1.5em', color: '#0056b3', marginBottom: '10px' }}>
           沖縄の不動産投資を、もっと賢く、もっと身近に。
