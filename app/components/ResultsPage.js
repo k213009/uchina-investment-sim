@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation'; // Next.jsの機能に変更
@@ -21,7 +21,7 @@ const MetricWithTooltip = ({ label, tooltipText }) => (
 );
 
 function ResultsPage() {
-  // --- ▼▼▼ ここからがNext.jsへの修正箇所 ▼▼▼ ---
+  // --- Next.jsへの修正箇所 ---
   const router = useRouter();
   const searchParams = useSearchParams();
   const dataString = searchParams.get('data');
@@ -34,7 +34,7 @@ function ResultsPage() {
   } catch (error) {
     console.error("Failed to parse result data:", error);
   }
-  // --- ▲▲▲ ここまでがNext.jsへの修正箇所 ▲▲▲ ---
+  // --- Next.jsへの修正箇所 終了 ---
 
   const [showExpenses, setShowExpenses] = useState(false);
   const [showFundingExpenses, setShowFundingExpenses] = useState(true);
@@ -51,12 +51,11 @@ function ResultsPage() {
   if (!result) {
     return (
         <PageContainer>
-            <ResultsContainer>
-                <Header><h1>結果がありません</h1></Header>
-                <p style={{textAlign: 'center'}}>シミュレーションデータが見つかりません。入力画面から再度実行してください。</p>
-                {/* --- ▼▼▼ Linkの修正 ▼▼▼ --- */}
-                <BackLink href="/">入力画面に戻る</BackLink>
-            </ResultsContainer>
+          <ResultsContainer>
+            <Header><h1>結果がありません</h1></Header>
+            <p style={{textAlign: 'center'}}>シミュレーションデータが見つかりません。入力画面から再度実行してください。</p>
+            <BackLink href="/">入力画面に戻る</BackLink>
+          </ResultsContainer>
         </PageContainer>
     );
   }
@@ -142,33 +141,33 @@ function ResultsPage() {
         <Section>
             <SectionTitle>Aランクを目指す場合の資金計画（目安）</SectionTitle>
              <FundingPlanGrid>
-                  <FundingDetails>
-                      <h4>【費用】</h4>
-                      <p><span>建物価格:</span><span>{safeGet(result, 'funding_plan.building_cost', 0).toLocaleString()} 万円</span></p>
-                      <p><span>土地価格:</span><span>{safeGet(result, 'funding_plan.land_cost', 0).toLocaleString()} 万円</span></p>
-                      <p>
-                          <div>
-                              <span>諸費用合計:</span>
-                              <DetailsToggle onClick={() => setShowFundingExpenses(!showFundingExpenses)}>{showFundingExpenses ? '隠す' : '詳細'}</DetailsToggle>
-                          </div>
-                          <span>{safeGet(result, 'funding_plan.other_costs_details.total', 0).toLocaleString()} 万円</span>
-                      </p>
-                      <ExpenseDetails isOpen={showFundingExpenses} isSubItem={true}>
-                          <ExpenseItem><div>仲介手数料:</div><div>{safeGet(result, 'funding_plan.other_costs_details.brokerage_fee', 0).toLocaleString()} 万円</div></ExpenseItem>
-                          <ExpenseItem><div>印紙代:</div><div>{safeGet(result, 'funding_plan.other_costs_details.stamp_duty', 0).toLocaleString()} 万円</div></ExpenseItem>
-                          <ExpenseItem><div>登記費用:</div><div>{safeGet(result, 'funding_plan.other_costs_details.registration_tax', 0).toLocaleString()} 万円</div></ExpenseItem>
-                          <ExpenseItem><div>不動産取得税:</div><div>{safeGet(result, 'funding_plan.other_costs_details.property_acquisition_tax', 0).toLocaleString()} 万円</div></ExpenseItem>
-                      </ExpenseDetails>
-                      <hr />
-                      <p><strong>総費用合計</strong><strong>{safeGet(result, 'market_price', 0).toLocaleString()} 万円</strong></p>
-                  </FundingDetails>
-                  <FundingDetails>
-                      <h4>【調達】</h4>
-                      <p><MetricWithTooltip label="借入可能額（目安）" tooltipText="総合ランクがA(80点以上)となる、借入額の上限の目安です。この金額であれば、銀行から資金調達できる可能性が高いと判断できます。" /><span>{safeGet(result, 'estimated_loan_amount', 0).toLocaleString()} 万円</span></p>
-                      <p><MetricWithTooltip label="必要自己資金額（目安）" tooltipText="物件の総費用合計から、上記の借入可能額を差し引いた金額です。最低限この程度の自己資金が必要になる可能性があります。" /><span>{safeGet(result, 'required_equity', 0).toLocaleString()} 万円</span></p>
-                      <hr />
-                      <p><strong>調達資金合計</strong><strong>{(safeGet(result, 'estimated_loan_amount', 0) + safeGet(result, 'required_equity', 0)).toLocaleString()} 万円</strong></p>
-                  </FundingDetails>
+                <FundingDetails>
+                    <h4>【費用】</h4>
+                    <p><span>建物価格:</span><span>{safeGet(result, 'funding_plan.building_cost', 0).toLocaleString()} 万円</span></p>
+                    <p><span>土地価格:</span><span>{safeGet(result, 'funding_plan.land_cost', 0).toLocaleString()} 万円</span></p>
+                    <p>
+                        <div>
+                            <span>諸費用合計:</span>
+                            <DetailsToggle onClick={() => setShowFundingExpenses(!showFundingExpenses)}>{showFundingExpenses ? '隠す' : '詳細'}</DetailsToggle>
+                        </div>
+                        <span>{safeGet(result, 'funding_plan.other_costs_details.total', 0).toLocaleString()} 万円</span>
+                    </p>
+                    <ExpenseDetails isOpen={showFundingExpenses} isSubItem={true}>
+                        <ExpenseItem><div>仲介手数料:</div><div>{safeGet(result, 'funding_plan.other_costs_details.brokerage_fee', 0).toLocaleString()} 万円</div></ExpenseItem>
+                        <ExpenseItem><div>印紙代:</div><div>{safeGet(result, 'funding_plan.other_costs_details.stamp_duty', 0).toLocaleString()} 万円</div></ExpenseItem>
+                        <ExpenseItem><div>登記費用:</div><div>{safeGet(result, 'funding_plan.other_costs_details.registration_tax', 0).toLocaleString()} 万円</div></ExpenseItem>
+                        <ExpenseItem><div>不動産取得税:</div><div>{safeGet(result, 'funding_plan.other_costs_details.property_acquisition_tax', 0).toLocaleString()} 万円</div></ExpenseItem>
+                    </ExpenseDetails>
+                    <hr />
+                    <p><strong>総費用合計</strong><strong>{safeGet(result, 'market_price', 0).toLocaleString()} 万円</strong></p>
+                </FundingDetails>
+                <FundingDetails>
+                    <h4>【調達】</h4>
+                    <p><MetricWithTooltip label="借入可能額（目安）" tooltipText="総合ランクがA(80点以上)となる、借入額の上限の目安です。この金額であれば、銀行から資金調達できる可能性が高いと判断できます。" /><span>{safeGet(result, 'estimated_loan_amount', 0).toLocaleString()} 万円</span></p>
+                    <p><MetricWithTooltip label="必要自己資金額（目安）" tooltipText="物件の総費用合計から、上記の借入可能額を差し引いた金額です。最低限この程度の自己資金が必要になる可能性があります。" /><span>{safeGet(result, 'required_equity', 0).toLocaleString()} 万円</span></p>
+                    <hr />
+                    <p><strong>調達資金合計</strong><strong>{(safeGet(result, 'estimated_loan_amount', 0) + safeGet(result, 'required_equity', 0)).toLocaleString()} 万円</strong></p>
+                </FundingDetails>
             </FundingPlanGrid>
         </Section>
 
@@ -176,7 +175,8 @@ function ResultsPage() {
           <SectionTitle>物件評価額の比較</SectionTitle>
           <DetailsTable>
              <p><MetricWithTooltip label="市場価格（購入価格）" tooltipText="あなたが入力した、この物件の市場での取引価格です。全ての利回りは、この価格を基準に計算されます。" /><span>{safeGet(result, 'market_price', 0).toLocaleString()} 万円</span></p>
-             <p><MetricWithTooltip label="積算価格" tooltipText={safeGet(result, 'land_price_source', '基準地データが見つかりませんでした')} /><span>{safeGet(result, 'cost_approach_value', 0).toLocaleString()} 万円</span></p>
+             {/* ▼▼▼ 積算価格の根拠をツールチップに追記 ▼▼▼ */}
+             <p><MetricWithTooltip label="積算価格" tooltipText={`${safeGet(result, 'land_price_source', '近傍基準地データが見つかりませんでした')}。建物は再調達原価から築年数に応じた減価を差し引いて算出しています。`} /><span>{safeGet(result, 'cost_approach_value', 0).toLocaleString()} 万円</span></p>
              <ExpenseDetails isOpen={true} isSubItem={true} style={{paddingLeft: '10px'}}><ExpenseItem><div>土地(評価):</div><div>{safeGet(result, 'cost_approach_breakdown.land', 0).toLocaleString()} 万円</div></ExpenseItem><ExpenseItem><div>建物(評価):</div><div>{safeGet(result, 'cost_approach_breakdown.building', 0).toLocaleString()} 万円</div></ExpenseItem></ExpenseDetails>
              <p><MetricWithTooltip label="収益価格" tooltipText="この物件の年間の収益力から逆算した価値です。" /><span>{safeGet(result, 'income_approach_value', 0).toLocaleString()} 万円</span></p>
              <p><MetricWithTooltip label="銀行採用評価額" tooltipText="積算価格(70%)と収益価格(30%)を加味した、銀行が融資判断のベースとする評価額です。" /><span>{safeGet(result, 'bank_appraisal_value', 0).toLocaleString()} 万円</span></p>
@@ -235,8 +235,18 @@ function ResultsPage() {
             </ul>
           </NotesSection>
         </Section>
+        
+        {/* ▼▼▼ 追加セクション：免責事項と注意喚起 ▼▼▼ */}
+        <DisclaimerSection>
+            <h2 style={{ color: '#d32f2f', borderBottom: '2px solid #ffcdd2', paddingBottom: '10px' }}>⚠️ 免責事項（本ツール利用上の注意）</h2>
+            <p><strong>本アプリケーションで表示される評価額や融資可能額は、お客様が入力したデータと、一般公開された【概算の計算式】に基づいています。</strong></p>
+            <ul>
+                <li>実際の金融機関の審査や担保評価は、物件の個別状況や融資先の信用状況など、**より多くの要因**で決定されます。</li>
+                <li>本ツールはあくまで参考情報としてご利用ください。**実際の融資判断や投資の最終決定は、必ず専門家にご相談の上、ご自身の責任において行ってください。**</li>
+            </ul>
+        </DisclaimerSection>
+        {/* ▲▲▲ 追加セクション終了 ▲▲▲ */}
 
-        {/* --- ▼▼▼ Linkの修正 ▼▼▼ --- */}
         <BackLink href="/">別の物件でシミュレーションする</BackLink>
       </ResultsContainer>
     </PageContainer>
@@ -285,6 +295,30 @@ const NotesSection = styled.div`
     margin-bottom: 8px;
     line-height: 1.6;
   }
+`;
+
+const DisclaimerSection = styled(Section)`
+    margin-top: 40px;
+    background-color: #fff8f8; /* 警告色に近い背景 */
+    border-left: 5px solid #d32f2f; /* 赤い注意線 */
+    h2 {
+        font-weight: 700;
+        color: #d32f2f !important;
+    }
+    p {
+        font-size: 16px;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    li {
+        margin-bottom: 8px;
+        font-size: 15px;
+        color: #555;
+    }
 `;
 
 export default ResultsPage;
