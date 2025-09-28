@@ -136,7 +136,7 @@ def find_a_rank_loan(data, noi_year1, collateral_value):
 
 # --- APIエンドポイント ---
 # ▼▼▼ 修正箇所：FastAPIのデコレータを /simulate に修正 ▼▼▼
-@app.post("/") # vercel.jsonのルーティングとInputForm.jsに合わせる
+@app.post("/api/simulate") # vercel.jsonのルーティングとInputForm.jsに合わせる
 async def simulate(data: Dict):
     try:
         # FastAPIはリクエストボディを自動でパースするため、引数dataをそのまま使用
