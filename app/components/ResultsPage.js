@@ -254,7 +254,7 @@ function ResultsPage() {
 }
 
 // --- styled-componentsの定義 ---
-const PageContainer = styled.div` background-color: #f0f2f5; padding: 20px; font-family: 'Helvetica Neue', Arial, sans-serif; `;
+const PageContainer = styled.div` background-color: #f0f2f5; padding: 20px; font-family: 'Helvetica Neue', Arial, sans-serif; color: #333; `;
 const ResultsContainer = styled.div` max-width: 900px; margin: 20px auto; `;
 const Section = styled.div` margin-bottom: 20px; padding: 25px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); `;
 const Header = styled.div` text-align: center; margin-bottom: 30px; h1 { margin-top: 0; color: #007bff; font-weight: 600; } `;

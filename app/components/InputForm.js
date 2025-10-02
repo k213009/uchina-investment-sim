@@ -38,6 +38,7 @@ const Input = styled.input`
   border-radius: 4px;
   box-sizing: border-box;
   font-size: 16px;
+  color: #000 !important; 
   &:focus {
     outline: none;
     border-color: ${(props) => (props.hasError ? "#d32f2f" : "#007bff")};
@@ -54,6 +55,7 @@ const Select = styled.select`
   box-sizing: border-box;
   font-size: 16px;
   background-color: white;
+  color: #000 !important;
   &:focus {
     outline: none;
     border-color: ${(props) => (props.hasError ? "#d32f2f" : "#007bff")};
