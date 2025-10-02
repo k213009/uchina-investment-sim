@@ -99,7 +99,6 @@ function ResultsPage() {
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
     plugins: {
         legend: {
@@ -225,7 +224,9 @@ function ResultsPage() {
         
         <Section>
           <SectionTitle>長期収支シミュレーション (35年)</SectionTitle>
-          <Line options={chartOptions} data={chartData} />
+          <ChartWrapper>
+            <Line options={chartOptions} data={chartData} />
+          </ChartWrapper>
           
           <NotesSection>
             <h4>【シミュレーションの前提条件】</h4>
@@ -322,15 +323,11 @@ const DisclaimerSection = styled(Section)`
     }
 `;
 
-// ▼▼▼ グラフのスマホ表示崩れを防ぐためのコンテナ ▼▼▼
 const ChartWrapper = styled.div`
   position: relative;
-  height: 50vh; /* 画面の高さを基準に高さを設定 */
   width: 100%;
-
-  @media (max-width: 768px) {
-    height: 60vh; /* スマホでは少し縦長に */
-  }
 `;
 
+
 export default ResultsPage;
+
