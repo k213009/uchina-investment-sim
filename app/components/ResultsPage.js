@@ -99,6 +99,7 @@ function ResultsPage() {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
     plugins: {
         legend: {
@@ -319,6 +320,17 @@ const DisclaimerSection = styled(Section)`
         font-size: 15px;
         color: #555;
     }
+`;
+
+// ▼▼▼ グラフのスマホ表示崩れを防ぐためのコンテナ ▼▼▼
+const ChartWrapper = styled.div`
+  position: relative;
+  height: 50vh; /* 画面の高さを基準に高さを設定 */
+  width: 100%;
+
+  @media (max-width: 768px) {
+    height: 60vh; /* スマホでは少し縦長に */
+  }
 `;
 
 export default ResultsPage;

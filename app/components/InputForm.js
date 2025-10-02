@@ -105,6 +105,7 @@ const ErrorMessage = styled.span`
 const AppDescription = styled(Section)`
   background-color: #e7f3ff;
   border-left: 5px solid #007bff;
+  color: #333;
   p {
     margin-bottom: 10px;
     line-height: 1.6;
