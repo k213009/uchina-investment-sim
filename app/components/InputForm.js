@@ -189,6 +189,11 @@ const AppDescription = styled(Section)`
     color: #0056b3;
     margin-bottom: 10px;
   }
+
+  /* 2つ目以降のh4タグの上に余白を追加 */
+  h4 + h4, h4 + p + h4 {
+    margin-top: 20px;
+  }
 `;
 const Footer = styled.footer`
   margin-top: 40px;
@@ -288,13 +293,23 @@ function InputForm() {
 
         <h4>3. シミュレーションで分かる具体的な指標</h4>
         <p>
-          単なる利回りだけでなく、元銀行員のノウハウを詰め込んだ以下の指標を算出します。
+          単なる利回りだけでなく、銀行員のノウハウを詰め込んだ以下の指標を算出します。
         </p>
         <ul style={{ listStyleType: 'disc', paddingLeft: '20px' }}>
           <li><strong>予想収益：</strong>年間でいくら儲かるのか（キャッシュフロー）</li>
           <li><strong>銀行評価額：</strong>銀行目線での土地・建物の評価額と、販売価格との差額</li>
           <li><strong>損益分岐点：</strong>最低何部屋入居すれば赤字にならないか（損益分岐点入居率）</li>
         </ul>
+
+        {/* ▼▼▼ ここから追加 ▼▼▼ */}
+        <h4>4. 使い方</h4>
+        <ul style={{ listStyleType: 'disc', paddingLeft: '20px' }}>
+            <li>購入もしくは建築を検討している物件の情報を、フォームに従って入力してください。</li>
+            <li>不明な部分は「？」マークを参考に、入力内容をご確認ください。</li>
+            <li>「デモ用データを自動入力」ボタンを押すと、サンプルデータが入力されるのでご活用ください。</li>
+        </ul>
+        {/* ▲▲▲ ここまで追加 ▲▲▲ */}
+        
       </AppDescription>
 
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -401,4 +416,3 @@ function InputForm() {
 }
 
 export default InputForm;
-
