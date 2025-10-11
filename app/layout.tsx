@@ -1,7 +1,13 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
+// 1. Noto_Sans_JP をインポートします
+import { Noto_Sans_JP } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+// 2. Noto Sans JP の設定を記述します
+const notoSansJP = Noto_Sans_JP({
+  subsets: ['latin'],
+  weight: ['400', '700'], // 通常の太さと太字
+  display: 'swap',
+})
 
 export const metadata = {
   title: 'Create Next App',
@@ -11,11 +17,12 @@ export const metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.Node
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    // 3. 言語を 'ja' にし、className を変更します
+    <html lang="ja">
+      <body className={notoSansJP.className}>{children}</body>
     </html>
   )
 }
