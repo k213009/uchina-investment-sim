@@ -17,12 +17,11 @@ export const metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.Node
+  children: React.ReactNode
 }) {
   return (
     // 3. 言語を 'ja' にし、className を変更します
-    <html lang="ja">
-      <body className={notoSansJP.className}>{children}</body>
+    <html lang="ja">en}</body>
     </html>
   )
 }
