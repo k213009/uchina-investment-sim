@@ -1,11 +1,11 @@
 import './globals.css'
-// 1. Noto_Sans_JP をインポートします
 import { Noto_Sans_JP } from 'next/font/google'
+// ステップ1で作成したファイルをインポートします
+import StyledComponentsRegistry from './lib/registry'
 
-// 2. Noto Sans JP の設定を記述します
 const notoSansJP = Noto_Sans_JP({
   subsets: ['latin'],
-  weight: ['400', '700'], // 通常の太さと太字
+  weight: ['400', '700'],
   display: 'swap',
 })
 
@@ -21,7 +21,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className={notoSansJP.className}>{children}</body>
+      <body className={notoSansJP.className}>
+        {/* children全体をStyledComponentsRegistryで囲みます */}
+        <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+      </body>
     </html>
   )
 }
