@@ -20,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    // 3. 言語を 'ja' にし、className を変更します
-    <html lang="ja">en}</body>
+    <html lang="ja">
+      <body className={notoSansJP.className}>{children}</body>
     </html>
   )
 }
