@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="%E3%81%86%E3%81%A1%E3%81%AA%E3%83%BC%E5%8F%8E%E7%9B%8A%E7%89%A9%E4%BB%B6%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%BF%E3%83%BC">うちなー収益物件シミュレーター</h1>
+<p>このアプリは銀行員の開発者が、沖縄の不動産市場に特化して開発した<strong>本格的な不動産投資シミュレーションアプリ</strong>です。</p>
+<p>・ 検討中の投資物件を購⼊するべきかどうか（採算がとれるか）</p>
+<p>・ 購⼊のために銀⾏の融資を受ける際に、どのくらいであれば借入が可能か</p>
+<p>を知ることができます。</p>
+<p><strong><a href="https://uchina-investment-sim-te39.vercel.app/">👉使ってみる</a></strong></p>
+<p><img src="demo.gif" alt="アプリ動作のデモGIF"></p>
+<h2 id="%E3%81%93%E3%82%93%E3%81%AA%E6%96%B9%E3%81%AB%E3%81%8A%E3%81%99%E3%81%99%E3%82%81%E3%81%A7%E3%81%99">こんな方におすすめです</h2>
+<p>・ これから沖縄でアパート・マンション・外人住宅などを購入して家賃収入を得たい方</p>
+<p>・ 物件購入のために、銀行からの借入（アパートローン）を検討している方</p>
+<h2 id="%E3%81%93%E3%81%AE%E3%82%A2%E3%83%97%E3%83%AA%E3%81%A7%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%A7%E3%81%8D%E3%82%8B%E3%81%93%E3%81%A8">このアプリでシミュレーションできること</h2>
+<p>・ 検討中の物件が優良物件かどうか（投資すべきか）を判断するための<strong>客観的なデータを提供</strong>し、いくらまでなら銀行から借入ができそうかを瞬時にシミュレーションします。A～Dまでの4段階評価で、物件の良し悪しが直感的に判断できます。</p>
+<h3 id="%E6%A6%82%E8%A6%81">概要</h3>
+<p>物件情報(住所、価格、家賃等)や銀⾏借⼊の情報（金額、金利、期間）を⼊⼒することで</p>
+<p>・ 検討中の投資物件を購⼊するべきかどうか（採算がとれるか）</p>
+<p>・ 購⼊のために銀⾏の融資を受ける際に、どのくらいであれば借入が可能か</p>
+<p>を知ることができます。</p>
+<h3 id="%E8%A9%B3%E7%B4%B0">詳細</h3>
+<p>・ 投資安全性をA〜Dでランク付けしており、直観的に本物件の投資の良し悪しを判断することができます。</p>
+<p>・ 物件の銀行評価額を確認することができ、物件の購入（建築）金額との差額を知ることで、その価格が適正かどうかを客観的に判断することができます。</p>
+<p>・ 物件購入にあたり、どのくらいの融資が受けられるか、具体的な金額の目安を算出します。</p>
+<h2 id="%E4%BD%BF%E7%94%A8%E6%8A%80%E8%A1%93">使用技術</h2>
+<ul>
+<li><strong>フロントエンド</strong>: Next.js (App Router), React, React Hook Form, styled-components, Chart.js</li>
+<li><strong>バックエンド</strong>: Python (FastAPI), Pandas, numpy-financial</li>
+<li><strong>インフラ/デプロイ</strong>: Vercel (サーバーレス関数利用), Vercel.json (ルーティング設定)</li>
+<li><strong>開発環境</strong>: WSL (Ubuntu), VS Code, Git, GitHub</li>
+</ul>
+<hr>
+<h2 id="%E3%81%93%E3%81%AE%E3%82%A2%E3%83%97%E3%83%AA%E3%82%92%E9%96%8B%E7%99%BA%E3%81%97%E3%81%9F%E7%B5%8C%E7%B7%AF">このアプリを開発した経緯</h2>
+<p>銀行員をしている中で、非常に多くのお客様からの「この物件いくらまでなら借入できますか？」と相談を受けてきました。借入可能金額を調べるのは銀行員として非常に多くの労力を使います。それに対してお客様は早めに教えてほしいという依頼が多々あり、それならどっちの願いも解決できるアプリを作ろうと思い、本アプリの開発に至りました。</p>
+<h2 id="%E9%96%8B%E7%99%BA%E3%83%97%E3%83%AD%E3%82%BB%E3%82%B9%E3%81%A8%E5%B7%A5%E5%A4%AB%E3%81%97%E3%81%9F%E7%82%B9">開発プロセスと工夫した点</h2>
+<p>本アプリケーションは、企画から設計、開発、デプロイまで約3週間で完成させました。実務未経験というハンデを乗り越え、短期間でアイデアを形にするため、生成AI（Gemini Pro）を活用しました。</p>
+<ul>
+<li>
+<p><strong>1. 要件定義と設計は自身で主導</strong></p>
+<p>アプリの目的、必要な機能、画面構成といった上流工程はすべて自分自身で設計しました。銀行員としての実務経験から、「ユーザーが本当に必要とする指標は何か」「どのようなUI/UXなら直感的に使えるか」を定義し、開発の軸としました。</p>
+</li>
+<li>
+<p><strong>2. AIを相談相手として活用</strong></p>
+<p>具体的な実装においては、まず自分で考えたロジック等をAIに提示し、より効率的な書き方等について議論する形で開発を進めました。単に答えを求めるのではなく、AIが生成したコードを理解・修正しながらプロジェクトを前進させました。</p>
+</li>
+<li>
+<p><strong>3. 専門知識のコードへの落とし込み</strong></p>
+<p>特に、DSCRやLTVといった金融指標を基にした独自のスコアリングモデルを構築する上で、AIに金融の専門用語や計算の背景を正確に伝える工夫を実践しました。AIの提案を鵜呑みにせず、自身の銀行員経験を活かして計算式の検証とチューニングを繰り返すことで、ツールの精度を高めました。</p>
+</li>
+</ul>
+<h2 id="%E3%82%BD%E3%83%BC%E3%82%B9%E3%82%B3%E3%83%BC%E3%83%89">ソースコード</h2>
+<p>このプロジェクトの全ソースコードは、本リポジトリで公開しています。
+<a href="https://github.com/k213009/uchina-investment-sim"><strong>GitHubリポジトリ</strong></a></p>
+<h2 id="%E5%85%8D%E8%B2%AC%E4%BA%8B%E9%A0%85">免責事項</h2>
+<p>ご利用頂くことでのトラブル等は一切責任は負いかねます。</p>
+
+</body>
+</html>
